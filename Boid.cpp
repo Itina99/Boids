@@ -59,6 +59,7 @@ void Boid::calculateRules(const std::vector<Boid>& boids) {
     int separationNeighbors = 0;
     int alignmentNeighbors = 0;
 
+
     for (const Boid& other : boids) {
         float distance = magnitude(other.position - this->position);
         if (&other == this) continue;

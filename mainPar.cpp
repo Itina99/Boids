@@ -41,6 +41,7 @@ int main() {
         }
 
         // STAGE 2: Apply
+        #pragma omp parallel for
         for (Boid& boid : flock) {
             boid.updateState();
         }
