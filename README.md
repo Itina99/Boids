@@ -2,8 +2,7 @@
 
 This project implements a Boids flocking simulation and provides a deep-dive analysis of parallel optimization strategies using OpenMP. The goal is to parallelize an $O(N^2)$ brute-force algorithm and study its scalability, its limitations (Amdahl's Law), and the impact of hardware architecture (Cache, Hyper-Threading).
 
-![Boids Flocking Demo](demo.gif)
-*(Note: To display this, you must create a GIF, name it `demo.gif`, and upload it to your repository)*
+![Boids Flocking Demo](Boids.gif)
 
 ---
 
@@ -31,13 +30,16 @@ To compile and run this project, you will need:
 You can install the required Python libraries using pip:
 ```bash
 pip install pandas matplotlib
-🚀 How to Run (Getting Started)
+```
 
-1. Compilation
+---
+
+## 🚀 How to Run (Getting Started)
+
+### 1. Compilation
 
 The project uses CMake. To compile all executables:
-Bash
-
+```bash
 # 1. Clone the repository
 git clone [YOUR_REPO_URL]
 cd [REPO_NAME]
@@ -51,61 +53,68 @@ cmake ..
 
 # 4. Compile
 make
+```
 
 After compiling, the build/ (or cmake-build-debug/) directory will contain several executables.
 
-2. Run the Visualization
+### 2. Run the Visualization
 
 To see the simulation in action:
-Bash
+```bash
 
 # Runs the sequential version
 ./Visualize_Seq
 
 # Runs the parallel version (uses all available cores)
 ./Visualize_Par
+```
 
-3. Run the Benchmarks (Recommended)
+### 3. Run the Benchmarks (Recommended)
 
 This is the main experiment. The run_benchmarks.sh script launches the BenchmarkMain executable (which tests all 5 strategies) across a range of thread counts (1, 2, 4, 8, 16) and saves the results to a .csv file.
-Bash
+```bash
 
 # Make the script executable (only need to do this once)
 chmod +x run_benchmarks.sh
 
 # Run the full scalability test (this may take a long time!)
 ./run_benchmarks.sh
+```
 
 This will create a new file named like results_20251113_120000.csv with all the data.
 
-4. Run Specific Tests (Manual)
+### 4. Run Specific Tests (Manual)
 
 You can also launch individual benchmark executables. Remember to set the thread count using OMP_NUM_THREADS.
-Bash
+```bash
 
 # Runs the full benchmark (5 strategies) but only with 8 threads
 OMP_NUM_THREADS=8 ./BenchmarkMain
 
 # Runs the separate test for 'dynamic' scheduling with 8 threads
 OMP_NUM_THREADS=8 ./BenchmarkS1S2_Dynamic
+```
 
-📈 Analyzing the Results
+---
+
+## 📈 Analyzing the Results
 
 To generate the Speedup/Efficiency tables and plots:
 
-    Run the benchmark (Step 3) to generate a .csv file (e.g., results_...csv).
+1. Run the benchmark (Step 3) to generate a .csv file (e.g., results_...csv).
 
-    Open the plots.py file in a text editor.
+2. Open the plots.py file in a text editor.
 
-    Modify the CSV_FILE variable to match the name of your results file:
-    Python
+3. Modify the CSV_FILE variable to match the name of your results file:
+```python
 
 # Edit this line in plots.py
 CSV_FILE = "results_20251113_120000.csv" 
+```
 
-Run the Python script:
-Bash
-
-    python plots.py
+4. Run the Python script:
+```bash
+python plots.py
+```
 
 This will print the data tables to your terminal and open windows displaying the performance graphs.

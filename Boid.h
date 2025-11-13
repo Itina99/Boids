@@ -6,7 +6,7 @@
 // --- Simulation Constants ---
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
-const int NUM_BOIDS = 5000;
+const int NUM_BOIDS = 300;
 
 const float VISUAL_RANGE = 80.0f;
 const float SEPARATION_RANGE = 10.0f;

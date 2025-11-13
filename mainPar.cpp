@@ -44,15 +44,6 @@ int main() {
         // --- Rendering ---
         window.clear(sf::Color(50, 50, 80));
 
-        sf::RectangleShape marginBox;
-        const float innerWidth = SCREEN_WIDTH - (2 * EDGE_MARGIN);
-        const float innerHeight = SCREEN_HEIGHT - (2 * EDGE_MARGIN);
-        marginBox.setSize(sf::Vector2f(innerWidth, innerHeight));
-        marginBox.setPosition(sf::Vector2f(EDGE_MARGIN, EDGE_MARGIN));
-        marginBox.setFillColor(sf::Color::Transparent);
-        marginBox.setOutlineThickness(1.0f);
-        marginBox.setOutlineColor(sf::Color(100, 100, 150, 100));
-        window.draw(marginBox);
         for (Boid& boid : flock) {
             boid.draw(window);
         }
