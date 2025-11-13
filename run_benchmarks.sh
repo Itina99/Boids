@@ -2,8 +2,7 @@
 
 EXE_NAME="cmake-build-debug/BenchmarkMain"
 
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-OUT_FILE="results_${TIMESTAMP}.csv"
+OUT_FILE="results.csv"
 
 THREADS_TO_TEST="1 2 4 8 16"
 
