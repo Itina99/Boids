@@ -41,8 +41,8 @@ pip install pandas matplotlib
 The project uses CMake. To compile all executables:
 ```bash
 # 1. Clone the repository
-git clone [YOUR_REPO_URL]
-cd [REPO_NAME]
+git clone https://github.com/Itina99/Boids.git
+cd Boids
 
 # 2. Create a build directory
 mkdir build
@@ -63,10 +63,10 @@ To see the simulation in action:
 ```bash
 
 # Runs the sequential version
-./Visualize_Seq
+./BoidsSeq
 
 # Runs the parallel version (uses all available cores)
-./Visualize_Par
+./BoidsPar
 ```
 
 ### 3. Run the Benchmarks (Recommended)
@@ -81,7 +81,7 @@ chmod +x run_benchmarks.sh
 ./run_benchmarks.sh
 ```
 
-This will create a new file named like results_20251113_120000.csv with all the data.
+This will create a new file named results.csv with all the data.
 
 ### 4. Run Specific Tests (Manual)
 
@@ -109,7 +109,7 @@ To generate the Speedup/Efficiency tables and plots:
 ```python
 
 # Edit this line in plots.py
-CSV_FILE = "results_20251113_120000.csv" 
+CSV_FILE = "results.csv" 
 ```
 
 4. Run the Python script:
