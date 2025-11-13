@@ -20,21 +20,21 @@ int main() {
         flock.emplace_back(rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
     }
 
-    std::cout << "Benchmark Parallelo (Solo STAGE 2)..." << std::endl;
+    std::cout << "Benchmark Parallel (Only STAGE 2)..." << std::endl;
     std::cout << "Boids: " << NUM_BOIDS << ", Steps: " << NUM_STEPS << std::endl;
 
     double start_time = omp_get_wtime();
 
     for (int step = 0; step < NUM_STEPS; ++step) {
 
-        // STAGE 1: Calculate (Sequenziale)
+        // STAGE 1: Calculate (Sequential)
         for (Boid& boid : flock) {
             boid.calculateRules(flock);
             boid.applyBoundaryForces();
         }
 
-        // STAGE 2: Apply (Parallelo)
-#pragma omp parallel for
+        // STAGE 2: Apply (Parallel)
+        #pragma omp parallel for
         for (Boid& boid : flock) {
             boid.updateState();
         }
@@ -43,6 +43,6 @@ int main() {
     double end_time = omp_get_wtime();
     double time_elapsed = end_time - start_time;
 
-    std::cout << "Tempo totale (Parallelo S2): " << time_elapsed << " secondi" << std::endl;
+    std::cout << "Total time (Parallel S2): " << time_elapsed << " seconds" << std::endl;
     return 0;
 }

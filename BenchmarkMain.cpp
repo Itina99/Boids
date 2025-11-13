@@ -8,9 +8,8 @@
 #include "Boid.h"
 
 const int NUM_STEPS = 1000;
-const unsigned int SEED = 42; // Seed fisso per la riproducibilità
+const unsigned int SEED = 42;
 
-// Funzione helper per creare lo stormo
 std::vector<Boid> createFlock() {
     std::vector<Boid> flock;
     for (int i = 0; i < NUM_BOIDS; ++i) {
@@ -20,7 +19,7 @@ std::vector<Boid> createFlock() {
 }
 
 int main() {
-    std::cout << "Avvio Benchmark Comparativo Boids (Completo 5 Test)" << std::endl;
+    std::cout << "Starting Banchmark Comparison" << std::endl;
     std::cout << "Boids: " << NUM_BOIDS << ", Steps: " << NUM_STEPS << std::endl;
     #pragma omp parallel
     {
@@ -35,7 +34,7 @@ int main() {
 
     // --- 1. BENCHMARK SEQUENZIALE (BASELINE) ---
     {
-        std::cout << "Esecuzione: Sequenziale (Baseline)..." << std::endl;
+        std::cout << "Execution: Sequential (Baseline)..." << std::endl;
         srand(SEED);
         std::vector<Boid> flock = createFlock();
         double start = omp_get_wtime();
@@ -47,9 +46,9 @@ int main() {
         std::cout << "TIME_SEQ: " << time_seq << " s" << std::endl << "---" << std::endl;
     }
 
-    // --- 2. BENCHMARK PARALLELO (SOLO STAGE 1) ---
+    // --- 2. BENCHMARK PARALLEL (ONLY STAGE 1) ---
     {
-        std::cout << "Esecuzione: Parallelo (Solo S1)..." << std::endl;
+        std::cout << "Execution: Parallel (Only S1)..." << std::endl;
         srand(SEED);
         std::vector<Boid> flock = createFlock();
         double start = omp_get_wtime();
@@ -62,9 +61,9 @@ int main() {
         std::cout << "TIME_S1: " << time_par_s1 << " s" << std::endl << "---" << std::endl;
     }
 
-    // --- 3. BENCHMARK PARALLELO (SOLO STAGE 2) ---
+    // --- 3. BENCHMARK PARALLEL (ONLY STAGE 2) ---
     {
-        std::cout << "Esecuzione: Parallelo (Solo S2)..." << std::endl;
+        std::cout << "Execution: Parallel (Only S2)..." << std::endl;
         srand(SEED);
         std::vector<Boid> flock = createFlock();
         double start = omp_get_wtime();
@@ -77,9 +76,9 @@ int main() {
         std::cout << "TIME_S2: " << time_par_s2 << " s" << std::endl << "---" << std::endl;
     }
 
-    // --- 4. BENCHMARK PARALLELO (S1 + S2, INEFFICIENTE - 2 Regioni) ---
+    // --- 4. BENCHMARK PARALLEL (S1 + S2, 2 Regions) ---
     {
-        std::cout << "Esecuzione: Parallelo (S1 + S2, 2 Regioni Ineff.)..." << std::endl;
+        std::cout << "Execution: Parallel (S1 + S2, 2 Regions)..." << std::endl;
         srand(SEED);
         std::vector<Boid> flock = createFlock();
         double start = omp_get_wtime();
@@ -91,12 +90,12 @@ int main() {
             for (Boid& boid : flock) { boid.updateState(); }
         }
         time_par_s1s2_ineff = omp_get_wtime() - start;
-        std::cout << "TIME_S1S2_INEFF: " << time_par_s1s2_ineff << " s" << std::endl << "---" << std::endl;
+        std::cout << "TIME_S1S2: " << time_par_s1s2_ineff << " s" << std::endl << "---" << std::endl;
     }
 
-    // --- 5. BENCHMARK PARALLELO (S1 + S2, OTTIMALE - 1 Regione) ---
+    // --- 5. BENCHMARK PARALLEL (S1 + S2, OPTIMAL, 1 Region) ---
     {
-        std::cout << "Esecuzione: Parallelo (S1 + S2, 1 Regione Opt.)..." << std::endl;
+        std::cout << "Execution: Parallel (S1 + S2, 1 Region Opt.)..." << std::endl;
         srand(SEED);
         std::vector<Boid> flock = createFlock();
         double start = omp_get_wtime();
@@ -114,28 +113,26 @@ int main() {
         std::cout << "TIME_S1S2_OPT: " << time_par_s1s2_opt << " s" << std::endl << "---" << std::endl;
     }
 
-    // --- 6. RIEPILOGO RISULTATI ---
-    // (Questo riepilogo è solo per il tuo terminale, lo script bash lo ignora)
-    std::cout << "========= RIEPILOGO BENCHMARK =========" << std::endl;
+    // --- 6. RESULTS ---
+    std::cout << "========= RECAP BENCHMARK =========" << std::endl;
     std::cout << std::fixed << std::setprecision(4);
 
-    std::cout << "Test                        | Tempo (s)  | Speedup (relativo a Seq)" << std::endl;
+    std::cout << "Test                        | Time (s)  | Speedup" << std::endl;
     std::cout << "-------------------------------------------------------------------" << std::endl;
 
-    std::cout << "Sequenziale                 | " << std::setw(10) << time_seq << " | "
+    std::cout << "Sequential                 | " << std::setw(10) << time_seq << " | "
               << std::setw(8) << (time_seq / time_seq) << "x" << std::endl;
 
-    std::cout << "Parallelo (Solo S1)         | " << std::setw(10) << time_par_s1 << " | "
+    std::cout << "Parallel (Only S1)         | " << std::setw(10) << time_par_s1 << " | "
               << std::setw(8) << (time_seq / time_par_s1) << "x" << std::endl;
 
-    std::cout << "Parallelo (Solo S2)         | " << std::setw(10) << time_par_s2 << " | "
+    std::cout << "Parallel (Solo S2)         | " << std::setw(10) << time_par_s2 << " | "
               << std::setw(8) << (time_seq / time_par_s2) << "x" << std::endl;
 
-    std::cout << "Parallelo (S1+S2 Ineff)     | " << std::setw(10) << time_par_s1s2_ineff << " | "
+    std::cout << "Parallel (S1+S2)     | " << std::setw(10) << time_par_s1s2_ineff << " | "
               << std::setw(8) << (time_seq / time_par_s1s2_ineff) << "x" << std::endl;
 
-    std::cout << "Parallelo (S1+S2 Ottimale)  | " << std::setw(10) << time_par_s1s2_opt << " | "
+    std::cout << "Parallel (S1+S2 Optimal)  | " << std::setw(10) << time_par_s1s2_opt << " | "
               << std::setw(8) << (time_seq / time_par_s1s2_opt) << "x" << std::endl;
-
     return 0;
 }

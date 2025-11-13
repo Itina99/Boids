@@ -14,15 +14,12 @@ const int NUM_STEPS = 1000;
 const unsigned int SEED = 42;
 
 int main() {
-    // Il tuo setup è invariato
     srand(SEED);
     std::vector<Boid> flock;
     for (int i = 0; i < NUM_BOIDS; ++i) {
         flock.emplace_back(rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
     }
-
-    // Aggiornata la stampa
-    std::cout << "Benchmark Parallelo (S1 + S2, 1 Regione Ottimale)..." << std::endl;
+    std::cout << "Benchmark Parallel (S1 + S2) with dynamic scheduling..." << std::endl;
     std::cout << "Boids: " << NUM_BOIDS << ", Steps: " << NUM_STEPS << std::endl;
 
     double start_time = omp_get_wtime();
@@ -38,8 +35,7 @@ int main() {
     double end_time = omp_get_wtime();
     double time_elapsed = end_time - start_time;
 
-    // Aggiunto tag per lo script bash
-    std::cout << "TIME_S1S2_OPT: " << time_elapsed << " s" << std::endl;
+    std::cout << "TIME_S1S2: " << time_elapsed << " s" << std::endl;
 
     return 0;
 }
