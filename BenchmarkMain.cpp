@@ -1,14 +1,12 @@
-#include <SFML/Graphics.hpp>
-#include <vector>
-#include <ctime>
 #include <iostream>
+#include <vector>
+#include <string>
 #include <omp.h>
 #include <iomanip>
+#include "Boid.h" // Assumiamo ci sia il tuo header
 
-#include "Boid.h"
-
-const int NUM_STEPS = 1000;
-const unsigned int SEED = 42;
+// Valori di default
+int NUM_STEPS = 1000;
 
 std::vector<Boid> createFlock() {
     std::vector<Boid> flock;
@@ -18,24 +16,27 @@ std::vector<Boid> createFlock() {
     return flock;
 }
 
-int main() {
-    std::cout << "Starting Banchmark Comparison" << std::endl;
-    std::cout << "Boids: " << NUM_BOIDS << ", Steps: " << NUM_STEPS << std::endl;
-    #pragma omp parallel
-    {
-        #pragma omp master
-        {
-            std::cout << "Numero di Thread OpenMP: " << omp_get_num_threads() << std::endl;
-        }
+int main(int argc, char* argv[]) {
+    // Arg 1: Boids, Arg 2: Steps, Arg 3: Mode ("seq", "par", "all")
+    std::string mode = "all";
+
+    if (argc >= 3) {
+        NUM_BOIDS = std::atoi(argv[1]);
+        NUM_STEPS = std::atoi(argv[2]);
     }
-    std::cout << "---" << std::endl;
+    if (argc >= 4) {
+        mode = argv[3];
+    }
 
-    double time_seq = 0.0, time_par_s1 = 0.0, time_par_s2 = 0.0, time_par_s1s2_ineff = 0.0, time_par_s1s2_opt = 0.0;
+    std::cout << "Avvio Benchmark [Mode: " << mode << "]..." << std::endl;
+    std::cout << "Boids: " << NUM_BOIDS << ", Steps: " << NUM_STEPS << std::endl;
 
-    // --- 1. BENCHMARK SEQUENZIALE (BASELINE) ---
-    {
-        std::cout << "Execution: Sequential (Baseline)..." << std::endl;
-        srand(SEED);
+    double time_seq = 0.0;
+
+    // --- 1. SEQUENZIALE (Eseguito solo se mode è 'seq' o 'all') ---
+    if (mode == "seq" || mode == "all") {
+        std::cout << "Esecuzione: Sequenziale..." << std::endl;
+        srand(42);
         std::vector<Boid> flock = createFlock();
         double start = omp_get_wtime();
         for (int step = 0; step < NUM_STEPS; ++step) {
@@ -43,96 +44,73 @@ int main() {
             for (Boid& boid : flock) { boid.updateState(); }
         }
         time_seq = omp_get_wtime() - start;
-        std::cout << "TIME_SEQ: " << time_seq << " s" << std::endl << "---" << std::endl;
+        std::cout << "TIME_SEQ: " << time_seq << " s" << std::endl;
     }
 
-    // --- 2. BENCHMARK PARALLEL (ONLY STAGE 1) ---
-    {
-        std::cout << "Execution: Parallel (Only S1)..." << std::endl;
-        srand(SEED);
-        std::vector<Boid> flock = createFlock();
-        double start = omp_get_wtime();
-        for (int step = 0; step < NUM_STEPS; ++step) {
-            #pragma omp parallel for
-            for (Boid& boid : flock) { boid.calculateRules(flock); boid.applyBoundaryForces(); }
-            for (Boid& boid : flock) { boid.updateState(); }
-        }
-        time_par_s1 = omp_get_wtime() - start;
-        std::cout << "TIME_S1: " << time_par_s1 << " s" << std::endl << "---" << std::endl;
-    }
+    // --- PARALLELI (Eseguiti solo se mode è 'par' o 'all') ---
+    if (mode == "par" || mode == "all") {
 
-    // --- 3. BENCHMARK PARALLEL (ONLY STAGE 2) ---
-    {
-        std::cout << "Execution: Parallel (Only S2)..." << std::endl;
-        srand(SEED);
-        std::vector<Boid> flock = createFlock();
-        double start = omp_get_wtime();
-        for (int step = 0; step < NUM_STEPS; ++step) {
-            for (Boid& boid : flock) { boid.calculateRules(flock); boid.applyBoundaryForces(); }
-            #pragma omp parallel for
-            for (Boid& boid : flock) { boid.updateState(); }
-        }
-        time_par_s2 = omp_get_wtime() - start;
-        std::cout << "TIME_S2: " << time_par_s2 << " s" << std::endl << "---" << std::endl;
-    }
-
-    // --- 4. BENCHMARK PARALLEL (S1 + S2, 2 Regions) ---
-    {
-        std::cout << "Execution: Parallel (S1 + S2, 2 Regions)..." << std::endl;
-        srand(SEED);
-        std::vector<Boid> flock = createFlock();
-        double start = omp_get_wtime();
-        for (int step = 0; step < NUM_STEPS; ++step) {
-            #pragma omp parallel for
-            for (Boid& boid : flock) { boid.calculateRules(flock); boid.applyBoundaryForces(); }
-
-            #pragma omp parallel for
-            for (Boid& boid : flock) { boid.updateState(); }
-        }
-        time_par_s1s2_ineff = omp_get_wtime() - start;
-        std::cout << "TIME_S1S2: " << time_par_s1s2_ineff << " s" << std::endl << "---" << std::endl;
-    }
-
-    // --- 5. BENCHMARK PARALLEL (S1 + S2, OPTIMAL, 1 Region) ---
-    {
-        std::cout << "Execution: Parallel (S1 + S2, 1 Region Opt.)..." << std::endl;
-        srand(SEED);
-        std::vector<Boid> flock = createFlock();
-        double start = omp_get_wtime();
-        for (int step = 0; step < NUM_STEPS; ++step) {
-            #pragma omp parallel
-            {
-                #pragma omp for
+        // S1
+        {
+            std::cout << "Esecuzione: Parallelo (S1)..." << std::endl;
+            srand(42);
+            std::vector<Boid> flock = createFlock();
+            double start = omp_get_wtime();
+            for (int step = 0; step < NUM_STEPS; ++step) {
+                #pragma omp parallel for
                 for (Boid& boid : flock) { boid.calculateRules(flock); boid.applyBoundaryForces(); }
-
-                #pragma omp for
                 for (Boid& boid : flock) { boid.updateState(); }
             }
+            std::cout << "TIME_S1: " << (omp_get_wtime() - start) << " s" << std::endl;
         }
-        time_par_s1s2_opt = omp_get_wtime() - start;
-        std::cout << "TIME_S1S2_OPT: " << time_par_s1s2_opt << " s" << std::endl << "---" << std::endl;
+
+        // S2
+        {
+            std::cout << "Esecuzione: Parallelo (S2)..." << std::endl;
+            srand(42);
+            std::vector<Boid> flock = createFlock();
+            double start = omp_get_wtime();
+            for (int step = 0; step < NUM_STEPS; ++step) {
+                for (Boid& boid : flock) { boid.calculateRules(flock); boid.applyBoundaryForces(); }
+                #pragma omp parallel for
+                for (Boid& boid : flock) { boid.updateState(); }
+            }
+            std::cout << "TIME_S2: " << (omp_get_wtime() - start) << " s" << std::endl;
+        }
+
+        // S1+S2
+        {
+            std::cout << "Esecuzione: Parallelo (S1+S2)..." << std::endl;
+            srand(42);
+            std::vector<Boid> flock = createFlock();
+            double start = omp_get_wtime();
+            for (int step = 0; step < NUM_STEPS; ++step) {
+                #pragma omp parallel for
+                for (Boid& boid : flock) { boid.calculateRules(flock); boid.applyBoundaryForces(); }
+                #pragma omp parallel for
+                for (Boid& boid : flock) { boid.updateState(); }
+            }
+            std::cout << "TIME_S1S2: " << (omp_get_wtime() - start) << " s" << std::endl;
+        }
+
+        // S1+S2 Opt
+        {
+            std::cout << "Esecuzione: Parallelo (S1+S2 Opt)..." << std::endl;
+            srand(42);
+            std::vector<Boid> flock = createFlock();
+            double start = omp_get_wtime();
+            for (int step = 0; step < NUM_STEPS; ++step) {
+                #pragma omp parallel
+                {
+                    #pragma omp for
+                    for (Boid& boid : flock) { boid.calculateRules(flock); boid.applyBoundaryForces(); }
+                    #pragma omp for
+                    for (Boid& boid : flock) { boid.updateState(); }
+                }
+            }
+            std::cout << "TIME_S1S2_OPT: " << (omp_get_wtime() - start) << " s" << std::endl;
+        }
     }
 
-    // --- 6. RESULTS ---
-    std::cout << "========= RECAP BENCHMARK =========" << std::endl;
-    std::cout << std::fixed << std::setprecision(4);
-
-    std::cout << "Test                        | Time (s)  | Speedup" << std::endl;
-    std::cout << "-------------------------------------------------------------------" << std::endl;
-
-    std::cout << "Sequential                 | " << std::setw(10) << time_seq << " | "
-              << std::setw(8) << (time_seq / time_seq) << "x" << std::endl;
-
-    std::cout << "Parallel (Only S1)         | " << std::setw(10) << time_par_s1 << " | "
-              << std::setw(8) << (time_seq / time_par_s1) << "x" << std::endl;
-
-    std::cout << "Parallel (Solo S2)         | " << std::setw(10) << time_par_s2 << " | "
-              << std::setw(8) << (time_seq / time_par_s2) << "x" << std::endl;
-
-    std::cout << "Parallel (S1+S2)     | " << std::setw(10) << time_par_s1s2_ineff << " | "
-              << std::setw(8) << (time_seq / time_par_s1s2_ineff) << "x" << std::endl;
-
-    std::cout << "Parallel (S1+S2 Optimal)  | " << std::setw(10) << time_par_s1s2_opt << " | "
-              << std::setw(8) << (time_seq / time_par_s1s2_opt) << "x" << std::endl;
     return 0;
 }

@@ -4,7 +4,7 @@ import os
 import sys
 
 
-CSV_FILE = "results.csv"
+CSV_FILE = "results_averaged.csv"
 
 if not os.path.exists(CSV_FILE):
     print(f"Error: File '{CSV_FILE}' not found.")
