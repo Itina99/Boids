@@ -1,41 +1,59 @@
-//
-// Created by itina99 on 03/11/25.
-//
-
-#include <SFML/Graphics.hpp>
-#include <vector>
-#include <ctime>
 #include <iostream>
+#include <vector>
+#include <cstdlib> // Per atoi
 #include <omp.h>
+#include "Boid.h"  // Assicurati che questo file esista
 
-#include "Boid.h"
-
-const int NUM_STEPS = 1000;
+// Valori di default
+int NUM_STEPS = 1000;
 const unsigned int SEED = 42;
 
-int main() {
+int main(int argc, char* argv[]) {
+    // 1. Parsing argomenti da Python (se presenti)
+    if (argc >= 3) {
+        NUM_BOIDS = std::atoi(argv[1]);
+        NUM_STEPS = std::atoi(argv[2]);
+    }
+
     srand(SEED);
+
+    // Creazione Flock
     std::vector<Boid> flock;
+    flock.reserve(NUM_BOIDS); // Piccola ottimizzazione memory
     for (int i = 0; i < NUM_BOIDS; ++i) {
         flock.emplace_back(rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
     }
-    std::cout << "Benchmark Parallel (S1 + S2) with dynamic scheduling..." << std::endl;
+
+    std::cout << "Benchmark Dynamic Optimized (Single Region)..." << std::endl;
     std::cout << "Boids: " << NUM_BOIDS << ", Steps: " << NUM_STEPS << std::endl;
 
     double start_time = omp_get_wtime();
 
     for (int step = 0; step < NUM_STEPS; ++step) {
-        #pragma omp parallel for schedule(dynamic)
-        for (Boid& boid : flock) { boid.calculateRules(flock); boid.applyBoundaryForces(); }
+        // --- STRUTTURA OTTIMALE (Single Region) ---
+        // Creiamo il team di thread UNA volta sola
+#pragma omp parallel
+        {
+            // Usiamo schedule(dynamic)
+#pragma omp for schedule(dynamic)
+            for (int i = 0; i < NUM_BOIDS; ++i) {
+                flock[i].calculateRules(flock);
+                flock[i].applyBoundaryForces();
+            }
 
-        #pragma omp parallel for schedule(dynamic)
-        for (Boid& boid : flock) { boid.updateState(); }
+            // Usiamo schedule(dynamic)
+#pragma omp for schedule(dynamic)
+            for (int i = 0; i < NUM_BOIDS; ++i) {
+                flock[i].updateState();
+            }
+        }
     }
 
     double end_time = omp_get_wtime();
     double time_elapsed = end_time - start_time;
 
-    std::cout << "TIME_S1S2: " << time_elapsed << " s" << std::endl;
+    // Output formattato per il parser
+    std::cout << "TIME_DYNAMIC: " << time_elapsed << " s" << std::endl;
 
     return 0;
 }
