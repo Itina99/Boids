@@ -71,7 +71,7 @@ To see the simulation in action:
 
 ### 3. Run the Benchmarks (Recommended)
 
-This is the main experiment. The run_benchmarks.sh script launches the BenchmarkMain executable (which tests all 5 strategies) across a range of thread counts (1, 2, 4, 8, 16) and saves the results to a .csv file.
+This is the basic experiment. The run_benchmarks.sh script launches the BenchmarkMain executable (which tests all 5 strategies) across a range of thread counts (1, 2, 4, 8, 16) and saves the results to a .csv file.
 ```bash
 
 # Make the script executable (only need to do this once)
@@ -94,8 +94,14 @@ OMP_NUM_THREADS=8 ./BenchmarkMain
 # Runs the separate test for 'dynamic' scheduling with 8 threads
 OMP_NUM_THREADS=8 ./BenchmarkS1S2_Dynamic
 ```
-
+### 5. Run with average
+The main experiment with warm up and time average can be executed with the python script run_average.py. This can take a long time but is the more complete one
+```bash
+python run_average.py
+```
 ---
+
+
 
 ## 📈 Analyzing the Results
 
