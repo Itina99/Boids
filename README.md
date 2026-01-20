@@ -107,7 +107,7 @@ python run_and_average.py
 
 To generate the Speedup/Efficiency tables and plots:
 
-1. Run the benchmark (Step 3) to generate a .csv file (e.g., results_...csv).
+1. Run the benchmark (Step 3 or 5) to generate a .csv file (e.g., results_...csv).
 
 2. Open the plots.py file in a text editor.
 
