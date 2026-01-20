@@ -95,9 +95,9 @@ OMP_NUM_THREADS=8 ./BenchmarkMain
 OMP_NUM_THREADS=8 ./BenchmarkS1S2_Dynamic
 ```
 ### 5. Run with average
-The main experiment with warm up and time average can be executed with the python script run_average.py. This can take a long time but is the more complete one
+The main experiment with warm up and time average can be executed with the python script run_and_average.py. This can take a long time but is the more complete one
 ```bash
-python run_average.py
+python run_and_average.py
 ```
 ---
 
