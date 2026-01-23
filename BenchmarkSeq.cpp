@@ -1,19 +1,32 @@
-//
-// Created by itina99 on 03/11/25.
-//
+/**
+ * BenchmarkSeq.cpp
+ * ================
+ * Sequential Baseline Benchmark (No Parallelization)
+ *
+ * This is the baseline implementation with no parallel optimizations.
+ * All execution is done sequentially on a single thread. This serves as
+ * the reference point for calculating speedup and efficiency of parallel versions.
+ *
+ * Stage 1 (SEQUENTIAL): Calculate flocking rules for each boid
+ * Stage 2 (SEQUENTIAL): Update position and velocity for each boid
+ *
+ * Usage: ./BenchmarkSeq
+ */
+
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <ctime>
 #include <iostream>
-#include <omp.h> // Incluso solo per la funzione timer omp_get_wtime()
+#include <omp.h>  // Included only for timer function omp_get_wtime()
 
 #include "Boid.h"
 
-const int NUM_STEPS = 1000;
+const int NUM_STEPS = 1000;  // Number of simulation steps to run
 
 int main() {
-    srand(static_cast<unsigned int>(time(NULL)));
+    srand(static_cast<unsigned int>(time(NULL)));  // Random seed for boid positions
 
+    // Initialize flock with random positions
     std::vector<Boid> flock;
     for (int i = 0; i < NUM_BOIDS; ++i) {
         flock.emplace_back(rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
@@ -24,15 +37,18 @@ int main() {
 
     double start_time = omp_get_wtime();
 
+    // Main simulation loop - completely sequential
     for (int step = 0; step < NUM_STEPS; ++step) {
 
-        // STAGE 1: Calculate
+        // STAGE 1: Calculate rules for all boids
+        // Each boid examines all other boids to calculate flocking forces
         for (Boid& boid : flock) {
-            boid.calculateRules(flock);
-            boid.applyBoundaryForces();
+            boid.calculateRules(flock);      // Calculate cohesion, alignment, separation
+            boid.applyBoundaryForces();      // Apply screen boundary repulsion
         }
 
-        // STAGE 2: Apply
+        // STAGE 2: Apply updates to all boids
+        // Update positions and velocities based on calculated forces
         for (Boid& boid : flock) {
             boid.updateState();
         }
